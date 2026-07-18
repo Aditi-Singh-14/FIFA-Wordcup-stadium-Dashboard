@@ -1,0 +1,18 @@
+{
+  "name": "fifa-wc2026-stadium-ops-dashboard",
+  "version": "1.0.0",
+  "description": "FIFA World Cup 2026 Stadium Operations Dashboard – Cloud Run ready",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}
