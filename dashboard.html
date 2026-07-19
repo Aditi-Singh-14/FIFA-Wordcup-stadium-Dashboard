@@ -3,328 +3,398 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Stadium Command Center</title>
+<title>Stadium Ops Dashboard - FIFA World Cup 2028</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --clr-bg: #05070d;
-    --clr-border: rgba(6, 182, 212, 0.18);
-    --clr-text: #e2e8f0;
-    --clr-text-muted: #64748b;
-    --clr-security: #8b5cf6;
-    --clr-medical: #ec4899;
-    --clr-logistics: #06b6d4;
-    --clr-attendance: #22c55e;
-    --clr-all: #3b82f6;
+    --bg-main: #05070a;
+    --bg-card: rgba(12, 17, 29, 0.85);
+    --border: rgba(255, 255, 255, 0.1);
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --security: #8b5cf6;
+    --medical: #f43f5e;
+    --logistics: #06b6d4;
+    --accent: #3b82f6;
+    --nominal: #10b981;
+    --alert: #f97316;
   }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
   body {
     font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at 20% 0%, #10182e 0%, #05070d 55%, #030408 100%);
-    color: var(--clr-text);
-    min-height: 100vh;
-  }
-  .neon-divider {
-    height: 4px; width: 100%;
-    background: linear-gradient(90deg, #8b5cf6, #06b6d4, #ec4899, #22c55e, #f59e0b);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-  }
-  header { padding: 2rem 2rem 1.5rem; }
-  header h1 {
-    font-size: 1.6rem; font-weight: 900; letter-spacing: 0.03em;
-    background: linear-gradient(90deg, #fff, #8fb8ff 60%, #06b6d4);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  header p { font-size: 0.8rem; color: var(--clr-text-muted); margin-top: 0.35rem; letter-spacing: 0.02em; }
-  header::after {
-    content: ''; display: block; width: 64px; height: 3px; margin-top: 0.9rem; border-radius: 2px;
-    background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+    background-color: var(--bg-main);
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+        linear-gradient(rgba(5, 7, 10, 0.8), rgba(5, 7, 10, 0.8)),
+        url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&q=80&w=2000&blur=5');
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.1rem; padding: 0 2rem 1.5rem; }
-  .counter-card {
-    padding: 1.25rem; border-radius: 14px; position: relative; cursor: pointer;
-    background: rgba(18, 24, 42, 0.55);
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--clr-border);
-    border-top: 3px solid var(--glow);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  body::before {
+    content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
+    z-index: 10; background-size: 100% 4px, 3px 100%; pointer-events: none;
   }
-  .counter-card::before {
-    content: ''; position: absolute; inset: 0; border-radius: 14px;
-    background: var(--glow); opacity: 0.05; pointer-events: none;
-  }
-  .counter-card:hover { transform: translateY(-3px); box-shadow: 0 0 28px var(--glow); border-color: var(--glow); }
-  .counter-card.active-filter { box-shadow: 0 0 28px var(--glow); border-color: var(--glow); }
-  .counter-card .label { font-size: 0.68rem; color: var(--clr-text-muted); font-weight: 700; letter-spacing: 0.08em; }
-  .counter-card .value { font-size: 2rem; font-weight: 800; margin-top: 0.3rem; color: var(--glow); text-shadow: 0 0 18px var(--glow); }
-  .counter-card .hint { font-size: 0.65rem; color: #475569; margin-top: 0.2rem; }
 
-  main { padding: 0 2rem 2rem; display: grid; gap: 1.5rem; }
+  header {
+    background: rgba(9, 14, 26, 0.9); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); z-index: 20;
+  }
+  .header-title h1 { font-size: 1.3rem; font-weight: 900; letter-spacing: 1.5px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header-title p { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .header-status { display: flex; align-items: center; gap: 24px; font-size: 0.75rem; font-weight: 600; }
+  .live-indicator { background: #e11d48; padding: 3px 10px; border-radius: 4px; font-weight: 800; animation: pulse 2s infinite; box-shadow: 0 0 10px rgba(225, 29, 72, 0.5); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .top-stats { display: grid; grid-template-columns: 180px repeat(7, 1fr); gap: 10px; padding: 15px 24px; z-index: 20; }
+
+  .mascot-box { 
+    background: rgba(30, 41, 59, 0.4); border-radius: 12px; border: 1px solid var(--border); 
+    display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+  }
+  .mascot-box img { height: 75px; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4)); }
+
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+    position: relative; backdrop-filter: blur(10px); transition: all 0.2s ease; cursor: pointer;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); background: rgba(30, 41, 59, 0.6); }
+  .stat-card.active-filter { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--card-color, var(--accent)); border-radius: 12px 12px 0 0; }
+  .stat-label { font-size: 0.6rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px; }
+  .stat-value { font-size: 1.6rem; font-weight: 900; color: var(--card-color, #fff); text-shadow: 0 0 10px var(--card-color); }
+  .stat-trend { font-size: 0.6rem; margin-top: 2px; font-weight: 600; opacity: 0.8; white-space: nowrap; }
+
+  .dashboard-grid {
+    display: grid; grid-template-columns: 280px 1fr 320px; gap: 15px; padding: 0 24px 20px; flex: 1; overflow: hidden; z-index: 20;
+  }
+
   .panel {
-    background: rgba(14, 19, 34, 0.6); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--clr-border); border-radius: 14px; padding: 1.5rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px);
   }
-  .panel-title {
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--clr-text-muted);
-    margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase;
+  .panel-header {
+    padding: 12px 18px; background: rgba(255,255,255,0.05); font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border);
   }
-  .panel-title .dot { width: 7px; height: 7px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
+  .panel-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-  textarea {
-    width: 100%; background: rgba(6, 10, 20, 0.6); border: 1px solid var(--clr-border);
-    border-radius: 10px; padding: 0.9rem 1rem; color: var(--clr-text); font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem; resize: vertical; min-height: 90px;
-  }
-  textarea:focus { outline: none; border-color: #06b6d4; box-shadow: 0 0 0 3px rgba(6,182,212,0.15); }
-  textarea::placeholder { color: #4b5566; }
+  .stadium-map { height: 200px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .stadium-circle { width: 160px; height: 160px; border: 2px solid rgba(59, 130, 246, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .pitch { width: 100px; height: 65px; border: 1px solid rgba(59, 130, 246, 0.4); position: relative; }
 
-  .btn-analyze {
-    margin-top: 1rem; border: none; cursor: pointer; font-weight: 700; letter-spacing: 0.04em;
-    font-size: 0.85rem; padding: 0.75rem 1.6rem; border-radius: 10px; color: #04222b;
-    background: linear-gradient(135deg, #22d3ee, #06b6d4);
-    box-shadow: 0 4px 18px rgba(6,182,212,0.35);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .btn-analyze:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(6,182,212,0.5); }
-  .btn-analyze:active:not(:disabled) { transform: scale(0.97); }
-  .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; }
-  .hint-text { font-size: 0.75rem; color: var(--clr-text-muted); margin-left: 0.9rem; }
-  .error-text { font-size: 0.78rem; color: #f87171; margin-top: 0.6rem; display: none; }
+  .sector-list { flex: 1; padding: 10px; overflow-y: auto; }
+  .sector-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.8rem; }
+  .status-pill { padding: 3px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; }
+  .nominal { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+  .alert { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); animation: pulse-red 1.5s infinite; }
+  @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
-  .briefing-text { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; }
-  .briefing-meta { font-size: 0.68rem; color: #475569; margin-top: 0.8rem; }
-  .btn-refresh {
-    border: 1px solid rgba(6,182,212,0.4); background: rgba(6,182,212,0.08);
-    color: #67e8f9; font-size: 0.78rem; font-weight: 600; padding: 0.5rem 1.1rem; border-radius: 8px;
-    cursor: pointer; float: right; margin-bottom: 1rem;
-  }
-  .btn-refresh:hover { background: rgba(6,182,212,0.15); }
+  .incident-log-container { flex: 1; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px 18px; font-size: 0.65rem; color: var(--text-muted); background: rgba(5, 7, 10, 0.8); position: sticky; top: 0; z-index: 5; }
+  td { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.85rem; vertical-align: top; }
+  
+  .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.6rem; font-weight: 900; text-transform: uppercase; }
+  .tag-security { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+  .tag-medical { background: rgba(244, 63, 94, 0.2); color: #fca5a5; border: 1px solid rgba(244, 63, 94, 0.3); }
+  .tag-logistics { background: rgba(6, 182, 212, 0.2); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+  
+  .action-list { margin-top: 8px; padding-left: 15px; font-size: 0.75rem; color: #94a3b8; list-style-type: square; }
+  .action-list li { margin-bottom: 4px; }
 
-  table { width: 100%; border-collapse: collapse; text-align: left; }
-  th { padding: 0.8rem 1rem; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--clr-text-muted); border-bottom: 1px solid rgba(255,255,255,0.06); }
-  td { padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; vertical-align: top; }
-  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; }
-  .tag-security { background: rgba(139,92,246,0.15); color: #c4b5fd; }
-  .tag-medical { background: rgba(236,72,153,0.15); color: #f9a8d4; }
-  .tag-logistics { background: rgba(6,182,212,0.15); color: #67e8f9; }
-  .priority-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.65rem; font-weight: 700; margin-left: 0.4rem; }
-  .action-list { margin-top: 0.4rem; padding-left: 1rem; font-size: 0.78rem; color: #94a3b8; }
-  .btn-resolve {
-    border: 1px solid rgba(148,163,184,0.3); background: rgba(148,163,184,0.06);
-    color: #94a3b8; font-size: 0.68rem; font-weight: 600; padding: 0.35rem 0.7rem; border-radius: 6px;
-    cursor: pointer; white-space: nowrap;
-  }
-  .btn-resolve:hover { background: rgba(148,163,184,0.15); }
-  .incident-row.resolved { opacity: 0.4; }
-  .incident-row.hidden { display: none; }
-  .empty-row td { text-align: center; color: var(--clr-text-muted); padding: 2rem; font-size: 0.85rem; }
+  .ai-console { height: 230px; margin: 15px; background: rgba(5, 7, 10, 0.6); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 20px; position: relative; }
+  .ai-console::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100px; height: 100px; opacity: 0.05; pointer-events: none; background: url('https://upload.wikimedia.org/wikipedia/en/e/e3/2026_FIFA_World_Cup_logo.svg') no-repeat center; background-size: contain; }
+  .ai-console-header { display: flex; align-items: center; justify-content: space-between; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; margin-bottom: 15px; }
+  .ai-placeholder { color: #cbd5e1; font-family: 'JetBrains Mono'; font-size: 0.8rem; height: 110px; overflow-y: auto; line-height: 1.5; }
+  
+  .btn-refresh { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; font-size: 0.6rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+  .btn-refresh:hover { background: rgba(59, 130, 246, 0.2); }
+
+  .input-area { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+  textarea { flex: 1; width: 100%; background: rgba(5, 7, 10, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 15px; color: #fff; font-family: 'JetBrains Mono'; font-size: 0.85rem; resize: none; margin-bottom: 15px; }
+  .btn-analyze { width: 100%; padding: 14px; border: none; border-radius: 8px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; font-weight: 900; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+  .ticker { height: 40px; background: rgba(9, 14, 26, 0.95); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; font-size: 0.75rem; font-weight: 600; color: #94a3b8; z-index: 30; }
+  .ticker-track { display: flex; gap: 60px; animation: scroll 40s linear infinite; white-space: nowrap; }
+  @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+  .resolved { opacity: 0.35; filter: grayscale(0.5); }
 </style>
 </head>
 <body>
-  <div class="neon-divider"></div>
-  <header>
-    <h1>STADIUM COMMAND CENTER</h1>
-    <p>FIFA World Cup 2026 · Live Operations Tactical Log</p>
-  </header>
 
-  <div class="grid-container">
-    <div class="counter-card active-filter" id="card-all" data-filter="ALL" style="--glow: var(--clr-all);">
-      <span class="label">ACTIVE INCIDENTS</span>
-      <div class="value" id="metric-active">0</div>
-      <span class="hint">Reset grid filter</span>
+<header>
+  <div class="header-title">
+    <h1>STADIUM OPS DASHBOARD</h1>
+    <p>FIFA World Cup 2028 — COMMAND CENTER ALPHA</p>
+  </div>
+  <div class="header-status">
+    <div>MATCH DAY — <span style="color: var(--nominal)">ACTIVE</span></div>
+    <div id="val-time">00:00:00 UTC</div>
+    <div class="live-indicator">● LIVE FEED</div>
+  </div>
+</header>
+
+<div class="top-stats">
+  <div class="mascot-box">
+    <img src="https://ouch-cdn2.icons8.com/mOat17RAt7W96R7O6lH4G8uYf5WfGvKkO9YqP-yEwHw/rs:fit:256:256/czM6Ly9pY29uczgu/b3VjaC1wcm9kLmFz/c2V0cy9zdmcvMjA2/L2MzOTViZGY4LWE1/YzQtNDZlZC05NTcz/LWZmMjNlMGYyY2Rm/Ni5zdmc.png" alt="Mascot">
+  </div>
+  
+  <div class="stat-card active-filter" data-filter="ALL" style="--card-color: var(--accent)">
+    <div class="stat-label">Active Incidents</div>
+    <div class="stat-value" id="metric-active">0</div>
+    <div class="stat-trend">CURRENT SESSION</div>
+  </div>
+
+  <div class="stat-card" data-filter="Security" style="--card-color: var(--security)">
+    <div class="stat-label">Security Events</div>
+    <div class="stat-value" id="metric-security">0</div>
+    <div class="stat-trend">RESPONSE TEAM</div>
+  </div>
+
+  <div class="stat-card" data-filter="Medical" style="--card-color: var(--medical)">
+    <div class="stat-label">Medical Events</div>
+    <div class="stat-value" id="metric-medical">0</div>
+    <div class="stat-trend">TRIAGE QUEUE</div>
+  </div>
+
+  <div class="stat-card" data-filter="Logistics" style="--card-color: var(--logistics)">
+    <div class="stat-label">Logistics Events</div>
+    <div class="stat-value" id="metric-logistics">0</div>
+    <div class="stat-trend">FACILITY OPS</div>
+  </div>
+
+  <div class="stat-card" style="--card-color: var(--nominal); cursor: default;">
+    <div class="stat-label">Attendance</div>
+    <div class="stat-value" id="metric-attendance" style="font-size: 1.4rem;">0</div>
+    <div class="stat-trend">▲ 1,294 SINCE K.O.</div>
+  </div>
+
+  <div class="stat-card" style="--card-color: var(--accent); cursor: default;">
+    <div class="stat-label">Field Staff</div>
+    <div class="stat-value">342</div>
+    <div class="stat-trend">STATIONED</div>
+  </div>
+
+  <div class="stat-card" style="--card-color: #f8fafc; cursor: default;">
+    <div class="stat-label">Match Pulse</div>
+    <div class="stat-value" style="font-size: 1rem;">ARG 2 - 1 BRA</div>
+    <div class="stat-trend">68' MINS</div>
+  </div>
+</div>
+
+<main class="dashboard-grid">
+  <div class="col">
+    <div class="panel" style="margin-bottom: 15px;">
+      <div class="panel-header"><span class="dot"></span> STADIUM TRACKER</div>
+      <div class="stadium-map">
+        <div class="stadium-circle"><div class="pitch"></div></div>
+      </div>
     </div>
-    <div class="counter-card" id="card-security" data-filter="Security" style="--glow: var(--clr-security);">
-      <span class="label">SECURITY EVENTS</span>
-      <div class="value" id="metric-security">0</div>
-    </div>
-    <div class="counter-card" id="card-medical" data-filter="Medical" style="--glow: var(--clr-medical);">
-      <span class="label">MEDICAL EVENTS</span>
-      <div class="value" id="metric-medical">0</div>
-    </div>
-    <div class="counter-card" id="card-logistics" data-filter="Logistics" style="--glow: var(--clr-logistics);">
-      <span class="label">LOGISTICS EVENTS</span>
-      <div class="value" id="metric-logistics">0</div>
-    </div>
-    <div class="counter-card" style="--glow: var(--clr-attendance); cursor: default;">
-      <span class="label">STADIUM ATTENDANCE</span>
-      <div class="value" id="metric-attendance" style="font-size:1.5rem;">0</div>
+    
+    <div class="panel">
+      <div class="panel-header"><span class="dot"></span> SECTOR STATUS</div>
+      <div class="sector-list">
+        <div class="sector-row"><span>North Stand A</span> <span class="status-pill nominal">NOMINAL</span></div>
+        <div class="sector-row"><span>North Stand B</span> <span class="status-pill nominal">NOMINAL</span></div>
+        <div class="sector-row"><span>East Stand</span> <span class="status-pill" style="color: #94a3b8; background:rgba(255,255,255,0.05);">STANDBY</span></div>
+        <div class="sector-row"><span>South Lower</span> <span class="status-pill alert">ALERT</span></div>
+        <div class="sector-row"><span>Media Zone</span> <span class="status-pill nominal">NOMINAL</span></div>
+      </div>
     </div>
   </div>
 
-  <main>
-    <div class="panel">
-      <div class="panel-title"><span class="dot"></span>OPERATOR INPUT TERMINAL</div>
-      <textarea id="input-text" placeholder="Paste raw radio log message here. Example: 'Fight breaking out in Section E, gate 4 blocked'"></textarea>
-      <div>
-        <button class="btn-analyze" id="btn-analyze">ANALYZE</button>
-        <span class="hint-text">Press analyze to classify and dispatch incident</span>
+  <div class="col" style="display: flex; flex-direction: column;">
+    <div class="panel" style="flex: 1;">
+      <div class="panel-header">
+        <span class="dot"></span> LIVE INCIDENT LOG
+        <span style="margin-left: auto; color: var(--text-muted); font-size: 0.6rem;">REAL-TIME FEED</span>
       </div>
-      <div class="error-text" id="error-text"></div>
+      <div class="incident-log-container">
+        <table>
+          <thead>
+            <tr>
+              <th>TIME</th>
+              <th>CATEGORY</th>
+              <th>DISPATCH SUMMARY & TACTICAL STEPS</th>
+              <th style="text-align:right">ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="incident-tbody">
+             <tr class="empty-row"><td colspan="4" style="text-align:center; padding:50px; color:var(--text-muted);">Syncing with Command Center...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-title"><span class="dot"></span>AI COMMANDER'S BRIEFING</div>
-      <button class="btn-refresh" id="btn-refresh">Refresh briefing</button>
-      <p class="briefing-text" id="briefing-text">Loading briefing…</p>
-      <p class="briefing-meta" id="briefing-meta"></p>
+    <div class="panel ai-console">
+      <div class="ai-console-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="dot" style="background:#8b5cf6; box-shadow: 0 0 10px #8b5cf6;"></span> GEMINI AI COMMANDER
+        </div>
+        <button class="btn-refresh" id="btn-refresh">Refresh Briefing</button>
+      </div>
+      <div class="ai-placeholder" id="briefing-text">
+        // NEURAL MATRIX IDLE. STANDBY FOR INCIDENT ANALYSIS.
+      </div>
+      <div id="briefing-meta" style="font-size:0.6rem; color:var(--text-muted); position:absolute; bottom:15px; right:15px;"></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="panel" style="margin-bottom: 15px; flex: 1;">
+      <div class="panel-header"><span class="dot"></span> INPUT TERMINAL</div>
+      <div class="input-area">
+        <textarea id="input-text" placeholder="Example: 'Aggressive fans in Sector 202, Medical required for one minor injury...'"></textarea>
+        <button class="btn-analyze" id="btn-analyze">⚡ ANALYZE WITH GEMINI AI</button>
+        <div id="error-text" style="color:var(--medical); font-size:0.7rem; margin-top:8px; display:none; font-weight:bold;"></div>
+      </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-title"><span class="dot"></span>LIVE OPS INCIDENT DATABASE</div>
-      <table>
-        <thead><tr><th>CATEGORY</th><th>INCIDENT DISPATCH SUMMARY</th><th style="text-align:right;">STATUS</th></tr></thead>
-        <tbody id="incident-tbody">
-          <tr class="empty-row"><td colspan="3">No incidents yet. Submit a report above to begin.</td></tr>
-        </tbody>
-      </table>
+    <div class="panel" style="height: 180px;">
+      <div class="panel-header"><span class="dot"></span> SYSTEM DIAGNOSTICS</div>
+      <div class="sector-list">
+        <div class="sector-row"><span>Neural Engine</span> <span style="color:var(--nominal); font-weight:bold;">ONLINE</span></div>
+        <div class="sector-row"><span>CCTV Matrix</span> <span style="color:var(--nominal); font-weight:bold;">48 / 48</span></div>
+        <div class="sector-row"><span>Med Units</span> <span style="color:var(--alert); font-weight:bold;">12 / 14</span></div>
+      </div>
     </div>
-  </main>
+  </div>
+</main>
 
-  <script>
-    const API_BASE = ''; // same-origin; change if backend is hosted separately
+<div class="ticker">
+  <div class="ticker-track">
+     <span>[INFO] CROWD DENSITY AT GATE 4: 65% — NORMAL FLOW</span>
+     <span>[SECURITY] VERBAL ALTERCATION RESOLVED IN SECTOR E12</span>
+     <span>[WEATHER] TEMP: 24°C | HUMIDITY: 55% — STADIUM ROOF OPEN</span>
+  </div>
+</div>
 
-    const tagClass = { Security: 'tag-security', Medical: 'tag-medical', Logistics: 'tag-logistics' };
-    let currentFilter = 'ALL';
-    let incidents = [];
+<script>
+  const API_BASE = ''; 
+  const tagClass = { Security: 'tag-security', Medical: 'tag-medical', Logistics: 'tag-logistics' };
+  let currentFilter = 'ALL';
+  let incidents = [];
 
-    async function fetchJSON(path, opts) {
-      const res = await fetch(API_BASE + path, opts);
-      if (!res.ok) throw new Error('Request failed: ' + res.status);
-      return res.json();
+  function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  async function fetchJSON(path, opts) {
+    const res = await fetch(API_BASE + path, opts);
+    if (!res.ok) throw new Error('Request failed: ' + res.status);
+    return res.json();
+  }
+
+  function renderIncidents() {
+    const tbody = document.getElementById('incident-tbody');
+    const visible = incidents.filter(inc => currentFilter === 'ALL' || inc.category === currentFilter);
+    if (visible.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="4" style="text-align:center; padding:50px; color:var(--text-muted)">NO ${currentFilter === 'ALL' ? '' : currentFilter.toUpperCase()} INCIDENTS REPORTED.</td></tr>`;
+      return;
     }
+    tbody.innerHTML = visible.map(inc => `
+      <tr class="incident-row ${inc.status === 'Resolved' ? 'resolved' : ''}">
+        <td style="color:var(--text-muted); font-family: 'JetBrains Mono'; font-size: 0.7rem;">${new Date(inc.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}</td>
+        <td><span class="tag ${tagClass[inc.category] || ''}">${escapeHTML(inc.category)}</span></td>
+        <td>
+          <div style="font-weight:700; margin-bottom:4px;">${escapeHTML(inc.summary)}</div>
+          <div style="font-size:0.65rem; color:var(--text-muted); font-weight:600; margin-bottom:8px;">
+            PRIORITY: <span style="color:${inc.priorityColor}">${escapeHTML(inc.priority)}</span>
+          </div>
+          <ul class="action-list">
+            ${(inc.actionScript || []).map(step => `<li>${escapeHTML(step)}</li>`).join('')}
+          </ul>
+        </td>
+        <td style="text-align:right;">
+          ${inc.status === 'Resolved' ? '<span style="color:var(--text-muted); font-size:0.6rem; font-weight:900;">ARCHIVED</span>' : `<button style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-size:0.6rem; font-weight:900;" onclick="resolveIncident('${inc.incidentId}')">RESOLVE</button>`}
+        </td>
+      </tr>
+    `).join('');
+  }
 
-    function renderIncidents() {
-      const tbody = document.getElementById('incident-tbody');
-      const visible = incidents.filter(inc => currentFilter === 'ALL' || inc.category === currentFilter);
-      if (visible.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No incidents match this filter.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = visible.map(inc => `
-        <tr class="incident-row ${inc.status === 'Resolved' ? 'resolved' : ''}">
-          <td><span class="tag ${tagClass[inc.category] || ''}">${inc.category}</span>
-              <span class="priority-pill" style="background:${inc.priorityColor}22; color:${inc.priorityColor};">${inc.priority}</span></td>
-          <td>
-            ${inc.summary}
-            <ul class="action-list">
-              ${(inc.actionScript || []).map(a => `<li>${a}</li>`).join('')}
-            </ul>
-          </td>
-          <td style="text-align:right;">
-            ${inc.status === 'Resolved'
-              ? '<span style="color:#64748b; font-size:0.7rem;">RESOLVED</span>'
-              : `<button class="btn-resolve" data-id="${inc.incidentId}">Resolve</button>`}
-          </td>
-        </tr>
-      `).join('');
+  async function loadIncidents() {
+    try {
+      incidents = await fetchJSON('/api/incidents');
+      renderIncidents();
+    } catch (e) { console.error(e); }
+  }
 
-      tbody.querySelectorAll('.btn-resolve').forEach(btn => {
-        btn.addEventListener('click', () => resolveIncident(btn.dataset.id));
-      });
+  async function loadMetrics() {
+    try {
+      const m = await fetchJSON('/api/metrics');
+      document.getElementById('metric-active').textContent = m.totalActive;
+      document.getElementById('metric-security').textContent = m.security;
+      document.getElementById('metric-medical').textContent = m.medical;
+      document.getElementById('metric-logistics').textContent = m.logistics; // RESTORED
+      document.getElementById('metric-attendance').textContent = m.attendance.toLocaleString();
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadBriefing() {
+    try {
+      const b = await fetchJSON('/api/briefing');
+      document.getElementById('briefing-text').textContent = b.briefing;
+      document.getElementById('briefing-meta').textContent = `LAST ANALYSIS: ${new Date(b.generatedAt).toLocaleTimeString()}`;
+    } catch (e) { console.error(e); }
+  }
+
+  async function resolveIncident(id) {
+    try {
+      await fetchJSON(`/api/incidents/${id}/resolve`, { method: 'PATCH' });
+      await Promise.all([loadIncidents(), loadMetrics(), loadBriefing()]);
+    } catch (e) { console.error(e); }
+  }
+
+  async function analyzeIncident() {
+    const textarea = document.getElementById('input-text');
+    const btn = document.getElementById('btn-analyze');
+    const errorEl = document.getElementById('error-text');
+    const text = textarea.value.trim();
+    if (text.length < 5) return;
+    btn.disabled = true; btn.textContent = 'EXECUTING NEURAL ANALYSIS...';
+    try {
+      const envelope = await fetchJSON('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      incidents.unshift(envelope);
+      renderIncidents();
+      textarea.value = '';
+      await Promise.all([loadMetrics(), loadBriefing()]);
+    } catch (e) {
+      errorEl.style.display = 'block'; errorEl.textContent = 'SYSTEM OVERLOAD: AI ENGINE CONNECTION FAILED.';
+    } finally {
+      btn.disabled = false; btn.innerHTML = '⚡ ANALYZE WITH GEMINI AI';
     }
+  }
 
-    async function loadIncidents() {
-      try {
-        incidents = await fetchJSON('/api/incidents');
-        renderIncidents();
-      } catch (e) {
-        console.error('Failed to load incidents', e);
-      }
-    }
-
-    async function loadMetrics() {
-      try {
-        const m = await fetchJSON('/api/metrics');
-        document.getElementById('metric-active').textContent = m.totalActive;
-        document.getElementById('metric-security').textContent = m.security;
-        document.getElementById('metric-medical').textContent = m.medical;
-        document.getElementById('metric-logistics').textContent = m.logistics;
-        document.getElementById('metric-attendance').textContent = m.attendance.toLocaleString();
-      } catch (e) {
-        console.error('Failed to load metrics', e);
-      }
-    }
-
-    async function loadBriefing() {
-      try {
-        const b = await fetchJSON('/api/briefing');
-        document.getElementById('briefing-text').textContent = b.briefing;
-        const time = new Date(b.generatedAt).toLocaleTimeString();
-        document.getElementById('briefing-meta').textContent =
-          `Updated ${time} · based on ${b.basedOnIncidentCount} active incident${b.basedOnIncidentCount === 1 ? '' : 's'}${b.cached ? ' · cached' : ''}`;
-      } catch (e) {
-        document.getElementById('briefing-text').textContent = 'Unable to load briefing.';
-        console.error('Failed to load briefing', e);
-      }
-    }
-
-    async function resolveIncident(id) {
-      try {
-        await fetchJSON(`/api/incidents/${id}/resolve`, { method: 'PATCH' });
-        await Promise.all([loadIncidents(), loadMetrics(), loadBriefing()]);
-      } catch (e) {
-        console.error('Failed to resolve incident', e);
-      }
-    }
-
-    async function analyzeIncident() {
-      const textarea = document.getElementById('input-text');
-      const btn = document.getElementById('btn-analyze');
-      const errorEl = document.getElementById('error-text');
-      const text = textarea.value.trim();
-
-      errorEl.style.display = 'none';
-      if (text.length < 5) {
-        errorEl.textContent = 'Enter at least 5 characters describing the incident.';
-        errorEl.style.display = 'block';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'ANALYZING…';
-      try {
-        const envelope = await fetchJSON('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
-        });
-        incidents.unshift(envelope);
-        renderIncidents();
-        textarea.value = '';
-        await Promise.all([loadMetrics(), loadBriefing()]);
-      } catch (e) {
-        errorEl.textContent = 'Analysis failed. Check the backend connection and try again.';
-        errorEl.style.display = 'block';
-        console.error(e);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'ANALYZE';
-      }
-    }
-
-    document.getElementById('btn-analyze').addEventListener('click', analyzeIncident);
-    document.getElementById('btn-refresh').addEventListener('click', loadBriefing);
-
-    document.querySelectorAll('.counter-card[data-filter]').forEach(card => {
-      card.addEventListener('click', () => {
-        currentFilter = card.dataset.filter;
-        document.querySelectorAll('.counter-card').forEach(c => c.classList.remove('active-filter'));
-        card.classList.add('active-filter');
-        renderIncidents();
-      });
+  // RESTORED: Filter Card Handlers
+  document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
+    card.addEventListener('click', () => {
+      currentFilter = card.dataset.filter;
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+      card.classList.add('active-filter');
+      renderIncidents();
     });
+  });
 
-    // Initial load
-    loadIncidents();
-    loadMetrics();
-    loadBriefing();
+  document.getElementById('btn-analyze').addEventListener('click', analyzeIncident);
+  document.getElementById('btn-refresh').addEventListener('click', loadBriefing);
 
-    // Poll metrics + briefing periodically so the dashboard feels live
-    setInterval(loadMetrics, 20000);
-    setInterval(loadBriefing, 20000);
-  </script>
+  function updateClock() { document.getElementById('val-time').textContent = new Date().toUTCString().slice(17, 25) + ' UTC'; }
+  setInterval(updateClock, 1000);
+  setInterval(loadMetrics, 20000);
+  setInterval(loadBriefing, 20000); // RESTORED: Briefing Auto-polling
+
+  loadIncidents(); loadMetrics(); loadBriefing();
+</script>
 </body>
 </html>
