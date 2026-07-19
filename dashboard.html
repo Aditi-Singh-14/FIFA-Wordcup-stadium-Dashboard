@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stadium Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --clr-bg: #05070d;
+    --clr-border: rgba(6, 182, 212, 0.18);
+    --clr-text: #e2e8f0;
+    --clr-text-muted: #64748b;
+    --clr-security: #8b5cf6;
+    --clr-medical: #ec4899;
+    --clr-logistics: #06b6d4;
+    --clr-attendance: #22c55e;
+    --clr-all: #3b82f6;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at 20% 0%, #10182e 0%, #05070d 55%, #030408 100%);
+    color: var(--clr-text);
+    min-height: 100vh;
+  }
+  .neon-divider {
+    height: 4px; width: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #06b6d4, #ec4899, #22c55e, #f59e0b);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+  header { padding: 2rem 2rem 1.5rem; }
+  header h1 {
+    font-size: 1.6rem; font-weight: 900; letter-spacing: 0.03em;
+    background: linear-gradient(90deg, #fff, #8fb8ff 60%, #06b6d4);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { font-size: 0.8rem; color: var(--clr-text-muted); margin-top: 0.35rem; letter-spacing: 0.02em; }
+  header::after {
+    content: ''; display: block; width: 64px; height: 3px; margin-top: 0.9rem; border-radius: 2px;
+    background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+  }
+
+  .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.1rem; padding: 0 2rem 1.5rem; }
+  .counter-card {
+    padding: 1.25rem; border-radius: 14px; position: relative; cursor: pointer;
+    background: rgba(18, 24, 42, 0.55);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--clr-border);
+    border-top: 3px solid var(--glow);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+  .counter-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 14px;
+    background: var(--glow); opacity: 0.05; pointer-events: none;
+  }
+  .counter-card:hover { transform: translateY(-3px); box-shadow: 0 0 28px var(--glow); border-color: var(--glow); }
+  .counter-card.active-filter { box-shadow: 0 0 28px var(--glow); border-color: var(--glow); }
+  .counter-card .label { font-size: 0.68rem; color: var(--clr-text-muted); font-weight: 700; letter-spacing: 0.08em; }
+  .counter-card .value { font-size: 2rem; font-weight: 800; margin-top: 0.3rem; color: var(--glow); text-shadow: 0 0 18px var(--glow); }
+  .counter-card .hint { font-size: 0.65rem; color: #475569; margin-top: 0.2rem; }
+
+  main { padding: 0 2rem 2rem; display: grid; gap: 1.5rem; }
+  .panel {
+    background: rgba(14, 19, 34, 0.6); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--clr-border); border-radius: 14px; padding: 1.5rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+  .panel-title {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--clr-text-muted);
+    margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.5rem; text-transform: uppercase;
+  }
+  .panel-title .dot { width: 7px; height: 7px; border-radius: 50%; background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
+
+  textarea {
+    width: 100%; background: rgba(6, 10, 20, 0.6); border: 1px solid var(--clr-border);
+    border-radius: 10px; padding: 0.9rem 1rem; color: var(--clr-text); font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem; resize: vertical; min-height: 90px;
+  }
+  textarea:focus { outline: none; border-color: #06b6d4; box-shadow: 0 0 0 3px rgba(6,182,212,0.15); }
+  textarea::placeholder { color: #4b5566; }
+
+  .btn-analyze {
+    margin-top: 1rem; border: none; cursor: pointer; font-weight: 700; letter-spacing: 0.04em;
+    font-size: 0.85rem; padding: 0.75rem 1.6rem; border-radius: 10px; color: #04222b;
+    background: linear-gradient(135deg, #22d3ee, #06b6d4);
+    box-shadow: 0 4px 18px rgba(6,182,212,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-analyze:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(6,182,212,0.5); }
+  .btn-analyze:active:not(:disabled) { transform: scale(0.97); }
+  .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; }
+  .hint-text { font-size: 0.75rem; color: var(--clr-text-muted); margin-left: 0.9rem; }
+  .error-text { font-size: 0.78rem; color: #f87171; margin-top: 0.6rem; display: none; }
+
+  .briefing-text { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; }
+  .briefing-meta { font-size: 0.68rem; color: #475569; margin-top: 0.8rem; }
+  .btn-refresh {
+    border: 1px solid rgba(6,182,212,0.4); background: rgba(6,182,212,0.08);
+    color: #67e8f9; font-size: 0.78rem; font-weight: 600; padding: 0.5rem 1.1rem; border-radius: 8px;
+    cursor: pointer; float: right; margin-bottom: 1rem;
+  }
+  .btn-refresh:hover { background: rgba(6,182,212,0.15); }
+
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th { padding: 0.8rem 1rem; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--clr-text-muted); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  td { padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; vertical-align: top; }
+  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; }
+  .tag-security { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+  .tag-medical { background: rgba(236,72,153,0.15); color: #f9a8d4; }
+  .tag-logistics { background: rgba(6,182,212,0.15); color: #67e8f9; }
+  .priority-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 5px; font-size: 0.65rem; font-weight: 700; margin-left: 0.4rem; }
+  .action-list { margin-top: 0.4rem; padding-left: 1rem; font-size: 0.78rem; color: #94a3b8; }
+  .btn-resolve {
+    border: 1px solid rgba(148,163,184,0.3); background: rgba(148,163,184,0.06);
+    color: #94a3b8; font-size: 0.68rem; font-weight: 600; padding: 0.35rem 0.7rem; border-radius: 6px;
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn-resolve:hover { background: rgba(148,163,184,0.15); }
+  .incident-row.resolved { opacity: 0.4; }
+  .incident-row.hidden { display: none; }
+  .empty-row td { text-align: center; color: var(--clr-text-muted); padding: 2rem; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+  <div class="neon-divider"></div>
+  <header>
+    <h1>STADIUM COMMAND CENTER</h1>
+    <p>FIFA World Cup 2026 · Live Operations Tactical Log</p>
+  </header>
+
+  <div class="grid-container">
+    <div class="counter-card active-filter" id="card-all" data-filter="ALL" style="--glow: var(--clr-all);">
+      <span class="label">ACTIVE INCIDENTS</span>
+      <div class="value" id="metric-active">0</div>
+      <span class="hint">Reset grid filter</span>
+    </div>
+    <div class="counter-card" id="card-security" data-filter="Security" style="--glow: var(--clr-security);">
+      <span class="label">SECURITY EVENTS</span>
+      <div class="value" id="metric-security">0</div>
+    </div>
+    <div class="counter-card" id="card-medical" data-filter="Medical" style="--glow: var(--clr-medical);">
+      <span class="label">MEDICAL EVENTS</span>
+      <div class="value" id="metric-medical">0</div>
+    </div>
+    <div class="counter-card" id="card-logistics" data-filter="Logistics" style="--glow: var(--clr-logistics);">
+      <span class="label">LOGISTICS EVENTS</span>
+      <div class="value" id="metric-logistics">0</div>
+    </div>
+    <div class="counter-card" style="--glow: var(--clr-attendance); cursor: default;">
+      <span class="label">STADIUM ATTENDANCE</span>
+      <div class="value" id="metric-attendance" style="font-size:1.5rem;">0</div>
+    </div>
+  </div>
+
+  <main>
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>OPERATOR INPUT TERMINAL</div>
+      <textarea id="input-text" placeholder="Paste raw radio log message here. Example: 'Fight breaking out in Section E, gate 4 blocked'"></textarea>
+      <div>
+        <button class="btn-analyze" id="btn-analyze">ANALYZE</button>
+        <span class="hint-text">Press analyze to classify and dispatch incident</span>
+      </div>
+      <div class="error-text" id="error-text"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>AI COMMANDER'S BRIEFING</div>
+      <button class="btn-refresh" id="btn-refresh">Refresh briefing</button>
+      <p class="briefing-text" id="briefing-text">Loading briefing…</p>
+      <p class="briefing-meta" id="briefing-meta"></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><span class="dot"></span>LIVE OPS INCIDENT DATABASE</div>
+      <table>
+        <thead><tr><th>CATEGORY</th><th>INCIDENT DISPATCH SUMMARY</th><th style="text-align:right;">STATUS</th></tr></thead>
+        <tbody id="incident-tbody">
+          <tr class="empty-row"><td colspan="3">No incidents yet. Submit a report above to begin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = ''; // same-origin; change if backend is hosted separately
+
+    const tagClass = { Security: 'tag-security', Medical: 'tag-medical', Logistics: 'tag-logistics' };
+    let currentFilter = 'ALL';
+    let incidents = [];
+
+    async function fetchJSON(path, opts) {
+      const res = await fetch(API_BASE + path, opts);
+      if (!res.ok) throw new Error('Request failed: ' + res.status);
+      return res.json();
+    }
+
+    function renderIncidents() {
+      const tbody = document.getElementById('incident-tbody');
+      const visible = incidents.filter(inc => currentFilter === 'ALL' || inc.category === currentFilter);
+      if (visible.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No incidents match this filter.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = visible.map(inc => `
+        <tr class="incident-row ${inc.status === 'Resolved' ? 'resolved' : ''}">
+          <td><span class="tag ${tagClass[inc.category] || ''}">${inc.category}</span>
+              <span class="priority-pill" style="background:${inc.priorityColor}22; color:${inc.priorityColor};">${inc.priority}</span></td>
+          <td>
+            ${inc.summary}
+            <ul class="action-list">
+              ${(inc.actionScript || []).map(a => `<li>${a}</li>`).join('')}
+            </ul>
+          </td>
+          <td style="text-align:right;">
+            ${inc.status === 'Resolved'
+              ? '<span style="color:#64748b; font-size:0.7rem;">RESOLVED</span>'
+              : `<button class="btn-resolve" data-id="${inc.incidentId}">Resolve</button>`}
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.btn-resolve').forEach(btn => {
+        btn.addEventListener('click', () => resolveIncident(btn.dataset.id));
+      });
+    }
+
+    async function loadIncidents() {
+      try {
+        incidents = await fetchJSON('/api/incidents');
+        renderIncidents();
+      } catch (e) {
+        console.error('Failed to load incidents', e);
+      }
+    }
+
+    async function loadMetrics() {
+      try {
+        const m = await fetchJSON('/api/metrics');
+        document.getElementById('metric-active').textContent = m.totalActive;
+        document.getElementById('metric-security').textContent = m.security;
+        document.getElementById('metric-medical').textContent = m.medical;
+        document.getElementById('metric-logistics').textContent = m.logistics;
+        document.getElementById('metric-attendance').textContent = m.attendance.toLocaleString();
+      } catch (e) {
+        console.error('Failed to load metrics', e);
+      }
+    }
+
+    async function loadBriefing() {
+      try {
+        const b = await fetchJSON('/api/briefing');
+        document.getElementById('briefing-text').textContent = b.briefing;
+        const time = new Date(b.generatedAt).toLocaleTimeString();
+        document.getElementById('briefing-meta').textContent =
+          `Updated ${time} · based on ${b.basedOnIncidentCount} active incident${b.basedOnIncidentCount === 1 ? '' : 's'}${b.cached ? ' · cached' : ''}`;
+      } catch (e) {
+        document.getElementById('briefing-text').textContent = 'Unable to load briefing.';
+        console.error('Failed to load briefing', e);
+      }
+    }
+
+    async function resolveIncident(id) {
+      try {
+        await fetchJSON(`/api/incidents/${id}/resolve`, { method: 'PATCH' });
+        await Promise.all([loadIncidents(), loadMetrics(), loadBriefing()]);
+      } catch (e) {
+        console.error('Failed to resolve incident', e);
+      }
+    }
+
+    async function analyzeIncident() {
+      const textarea = document.getElementById('input-text');
+      const btn = document.getElementById('btn-analyze');
+      const errorEl = document.getElementById('error-text');
+      const text = textarea.value.trim();
+
+      errorEl.style.display = 'none';
+      if (text.length < 5) {
+        errorEl.textContent = 'Enter at least 5 characters describing the incident.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'ANALYZING…';
+      try {
+        const envelope = await fetchJSON('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        incidents.unshift(envelope);
+        renderIncidents();
+        textarea.value = '';
+        await Promise.all([loadMetrics(), loadBriefing()]);
+      } catch (e) {
+        errorEl.textContent = 'Analysis failed. Check the backend connection and try again.';
+        errorEl.style.display = 'block';
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'ANALYZE';
+      }
+    }
+
+    document.getElementById('btn-analyze').addEventListener('click', analyzeIncident);
+    document.getElementById('btn-refresh').addEventListener('click', loadBriefing);
+
+    document.querySelectorAll('.counter-card[data-filter]').forEach(card => {
+      card.addEventListener('click', () => {
+        currentFilter = card.dataset.filter;
+        document.querySelectorAll('.counter-card').forEach(c => c.classList.remove('active-filter'));
+        card.classList.add('active-filter');
+        renderIncidents();
+      });
+    });
+
+    // Initial load
+    loadIncidents();
+    loadMetrics();
+    loadBriefing();
+
+    // Poll metrics + briefing periodically so the dashboard feels live
+    setInterval(loadMetrics, 20000);
+    setInterval(loadBriefing, 20000);
+  </script>
+</body>
+</html>
